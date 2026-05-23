@@ -24,7 +24,7 @@ model User {
   password  String
   role      Role       @default(ADMIN)
   schoolId  String?
-  school    School?    @relation(fields: [schoolId], references: [id])
+  school    School?    @relation(fields: [schoolId], references: [id], onDelete: SetNull)
   createdAt DateTime   @default(now())
   auditLogs AuditLog[]
 }
@@ -86,6 +86,10 @@ model AuditLog {
   oldValue     String?
   newValue     String?
   timestamp    DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([timestamp])
 }
 
 enum Role {
