@@ -5,14 +5,36 @@ import type { Teacher } from "@prisma/client";
 
 type QueueEntry = Teacher & { status: ComplianceStatus };
 
-export function ActionQueue({ entries }: { entries: QueueEntry[] }) {
+const TITLES: Partial<Record<ComplianceStatus, string>> = {
+  EXPIRED: "Expired Permits",
+  IN_APPEAL: "In Appeal",
+  ACTION_REQUIRED: "Action Required",
+  AT_RISK: "At Risk (Expiring Soon)",
+  COMPLIANT: "Compliant Teachers",
+  IN_PROGRESS: "In Progress",
+  EXEMPT: "Exempt Teachers",
+};
+
+interface Props {
+  entries: QueueEntry[];
+  activeFilter?: ComplianceStatus;
+}
+
+export function ActionQueue({ entries, activeFilter }: Props) {
+  const title = activeFilter ? (TITLES[activeFilter] ?? activeFilter) : "Action Queue";
+
   return (
     <div className="overflow-hidden rounded border">
-      <div className="bg-slate-100 px-4 py-2 text-sm font-semibold">
-        Action Queue
+      <div className="bg-[#1a3878] px-4 py-2 text-sm font-semibold text-white">
+        {title}
+        {activeFilter && (
+          <span className="ml-2 text-xs font-normal text-blue-200">
+            — {entries.length} teacher{entries.length !== 1 ? "s" : ""}
+          </span>
+        )}
       </div>
       {entries.length === 0 && (
-        <p className="p-4 text-sm text-slate-400">No outstanding actions.</p>
+        <p className="p-4 text-sm text-slate-400">No teachers in this category.</p>
       )}
       {entries.map((t) => (
         <div

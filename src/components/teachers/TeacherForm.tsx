@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
 import {
   Select,
@@ -125,13 +126,16 @@ export function TeacherForm({ schoolId, existing }: Props) {
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="gender">Gender *</Label>
-          <Input
-            id="gender"
-            name="gender"
-            defaultValue={existing?.gender}
-            required
-          />
+          <Label>Gender *</Label>
+          <Select name="gender" defaultValue={existing?.gender ?? "Male"}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Male">Male</SelectItem>
+              <SelectItem value="Female">Female</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
@@ -175,7 +179,13 @@ export function TeacherForm({ schoolId, existing }: Props) {
       </div>
       <div className="space-y-1">
         <Label htmlFor="notes">Notes</Label>
-        <Input id="notes" name="notes" defaultValue={existing?.notes ?? ""} />
+        <Textarea
+          id="notes"
+          name="notes"
+          rows={4}
+          defaultValue={existing?.notes ?? ""}
+          placeholder="Add any relevant notes about this teacher…"
+        />
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex gap-3">

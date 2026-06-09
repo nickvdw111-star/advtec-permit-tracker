@@ -16,7 +16,7 @@ const CONFIG: Record<ComplianceStatus, { label: string; className: string }> = {
   },
   IN_PROGRESS: {
     label: "In Progress",
-    className: "bg-blue-100 text-blue-800 border-blue-200",
+    className: "bg-[#1a3878]/10 text-[#1a3878] border-[#1a3878]/20",
   },
   IN_APPEAL: {
     label: "In Appeal",
@@ -28,7 +28,7 @@ const CONFIG: Record<ComplianceStatus, { label: string; className: string }> = {
   },
   EXEMPT: {
     label: "Exempt",
-    className: "bg-slate-100 text-slate-600 border-slate-200",
+    className: "bg-[#1a3878]/5 text-[#1a3878]/70 border-[#1a3878]/10",
   },
 };
 

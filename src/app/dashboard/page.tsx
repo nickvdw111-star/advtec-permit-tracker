@@ -9,20 +9,40 @@ import { SchoolBreakdown } from "~/components/dashboard/SchoolBreakdown";
 
 const SIX_MONTHS = new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000);
 
-const QUEUE_STATUSES: ComplianceStatus[] = [
+const DEFAULT_QUEUE_STATUSES: ComplianceStatus[] = [
   "EXPIRED",
   "IN_APPEAL",
   "ACTION_REQUIRED",
 ];
+
 const STATUS_SEVERITY: Record<string, number> = {
   EXPIRED: 0,
   IN_APPEAL: 1,
   ACTION_REQUIRED: 2,
+  AT_RISK: 3,
+  IN_PROGRESS: 4,
+  COMPLIANT: 5,
+  EXEMPT: 6,
 };
 
-export default async function DashboardPage() {
+const VALID_FILTERS = new Set<ComplianceStatus>([
+  "COMPLIANT", "AT_RISK", "ACTION_REQUIRED",
+  "IN_PROGRESS", "IN_APPEAL", "EXPIRED", "EXEMPT",
+]);
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>;
+}) {
   const session = await auth();
   if (!session) redirect("/auth/signin");
+
+  const { filter } = await searchParams;
+  const activeFilter =
+    filter && VALID_FILTERS.has(filter as ComplianceStatus)
+      ? (filter as ComplianceStatus)
+      : undefined;
 
   const where =
     session.user.role === "ADMIN" ? { schoolId: session.user.schoolId! } : {};
@@ -60,12 +80,22 @@ export default async function DashboardPage() {
     orderBy: { endDate: "asc" },
   });
 
-  const actionQueue = teachersWithStatus
-    .filter((t) => QUEUE_STATUSES.includes(t.status))
-    .sort(
-      (a, b) =>
-        (STATUS_SEVERITY[a.status] ?? 99) - (STATUS_SEVERITY[b.status] ?? 99),
-    );
+  // If a filter is active show only that status; otherwise show default critical queue
+  const actionQueue = activeFilter
+    ? teachersWithStatus
+        .filter((t) => t.status === activeFilter)
+        .sort(
+          (a, b) =>
+            (STATUS_SEVERITY[a.status] ?? 99) -
+            (STATUS_SEVERITY[b.status] ?? 99),
+        )
+    : teachersWithStatus
+        .filter((t) => DEFAULT_QUEUE_STATUSES.includes(t.status))
+        .sort(
+          (a, b) =>
+            (STATUS_SEVERITY[a.status] ?? 99) -
+            (STATUS_SEVERITY[b.status] ?? 99),
+        );
 
   const isOpsManager = session.user.role === "OPS_MANAGER";
   let schoolRows: {
@@ -104,10 +134,11 @@ export default async function DashboardPage() {
         expat={expat}
         local={local}
         counts={counts}
+        activeFilter={activeFilter}
       />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <UpcomingEvents permits={upcomingPermits} />
-        <ActionQueue entries={actionQueue} />
+        <ActionQueue entries={actionQueue} activeFilter={activeFilter} />
       </div>
       {isOpsManager && <SchoolBreakdown rows={schoolRows} />}
     </main>

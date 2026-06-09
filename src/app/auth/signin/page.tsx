@@ -28,7 +28,7 @@ export default function SignInPage({
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50">
+    <main className="flex min-h-screen items-center justify-center bg-[#f0f4f9]">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Advtech Permit Tracker</CardTitle>
