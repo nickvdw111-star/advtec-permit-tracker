@@ -37,7 +37,7 @@ export function calculateTeacherStatus(
   const statuses = permits.map(getPermitEffectiveStatus);
 
   for (const status of PRIORITY) {
-    if (statuses.includes(status)) return status;
+    if ((statuses as string[]).includes(status)) return status;
   }
 
   return "COMPLIANT";
