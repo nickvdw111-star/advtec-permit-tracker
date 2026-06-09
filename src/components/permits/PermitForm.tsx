@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export function PermitForm({ teacherId, existing, onDone }: Props) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -50,6 +52,7 @@ export function PermitForm({ teacherId, existing, onDone }: Props) {
     }
 
     setLoading(false);
+    router.refresh();
     onDone();
   }
 
