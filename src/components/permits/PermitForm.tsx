@@ -24,6 +24,12 @@ interface Props {
   onDone: () => void;
 }
 
+function normalizeNextSteps(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.toLowerCase() === "none") return undefined;
+  return trimmed;
+}
+
 export function PermitForm({ teacherId, existing, onDone }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -41,7 +47,7 @@ export function PermitForm({ teacherId, existing, onDone }: Props) {
       workflowStatus:
         (fd.get("workflowStatus") as PermitInput["workflowStatus"]) ?? "NONE",
       comments: (fd.get("comments") as string) || undefined,
-      nextSteps: (fd.get("nextSteps") as string) || undefined,
+      nextSteps: normalizeNextSteps(fd.get("nextSteps") as string),
       nextStepsComplete: fd.get("nextStepsComplete") === "true",
     };
 
@@ -116,7 +122,11 @@ export function PermitForm({ teacherId, existing, onDone }: Props) {
       </div>
       <div className="space-y-1">
         <Label>Next Steps</Label>
-        <Input name="nextSteps" defaultValue={existing?.nextSteps ?? ""} />
+        <Input
+          name="nextSteps"
+          defaultValue={existing?.nextSteps ?? ""}
+          placeholder="Leave blank if no action needed"
+        />
       </div>
       <div className="space-y-1">
         <Label>Next Steps Complete</Label>
