@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { db } from "~/server/db";
 import { auth } from "~/server/auth";
-import { calculateTeacherStatus } from "~/lib/status";
+import { calculateTeacherStatus, getStatusReason } from "~/lib/status";
 import { StatusBadge } from "~/components/teachers/StatusBadge";
 import { TeacherForm } from "~/components/teachers/TeacherForm";
 import { PermitList } from "~/components/permits/PermitList";
@@ -38,6 +38,7 @@ export default async function TeacherProfilePage({
   }
 
   const status = calculateTeacherStatus(teacher.teacherType, teacher.permits);
+  const reason = getStatusReason(teacher.teacherType, teacher.permits);
 
   return (
     <main className="mx-auto max-w-4xl p-6">
@@ -50,7 +51,14 @@ export default async function TeacherProfilePage({
             {teacher.employeeNo} · {teacher.subject}
           </p>
         </div>
-        <StatusBadge status={status} />
+        <div className="flex flex-col items-end gap-1">
+          <StatusBadge status={status} />
+          {reason && (
+            <p className="max-w-[220px] text-right text-xs text-slate-500">
+              {reason}
+            </p>
+          )}
+        </div>
       </div>
 
       <Tabs defaultValue="details">

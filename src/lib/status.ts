@@ -1,5 +1,11 @@
 import type { Permit, TeacherType } from "@prisma/client";
 
+const PERMIT_LABELS: Record<string, string> = {
+  PERMISSION_TO_TEACH: "Permission to Teach",
+  PERMISSION_TO_WORK: "Permission to Work",
+  WORK_PERMIT: "Work Permit",
+};
+
 export type ComplianceStatus =
   | "COMPLIANT"
   | "AT_RISK"
@@ -41,4 +47,46 @@ export function calculateTeacherStatus(
   }
 
   return "COMPLIANT";
+}
+
+export function getStatusReason(
+  teacherType: TeacherType,
+  permits: Permit[],
+): string | null {
+  if (teacherType === "LOCAL") return null;
+
+  if (permits.length === 0)
+    return "No permits on file — add permits in the Permits tab.";
+
+  const now = new Date();
+
+  const expired = permits.filter(
+    (p) => p.workflowStatus === "NONE" && p.endDate < now,
+  );
+  if (expired.length > 0)
+    return `Expired: ${expired.map((p) => PERMIT_LABELS[p.permitType]).join(", ")}.`;
+
+  const inAppeal = permits.filter((p) => p.workflowStatus === "IN_APPEAL");
+  if (inAppeal.length > 0)
+    return `Appeal in progress: ${inAppeal.map((p) => PERMIT_LABELS[p.permitType]).join(", ")}.`;
+
+  const needsAction = permits.filter((p) => p.nextSteps && !p.nextStepsComplete);
+  if (needsAction.length > 0)
+    return needsAction
+      .map((p) => `${PERMIT_LABELS[p.permitType]}: ${p.nextSteps}`)
+      .join(" · ");
+
+  const atRisk = permits.filter(
+    (p) =>
+      p.endDate >= now &&
+      p.endDate.getTime() - now.getTime() <= SIX_MONTHS_MS,
+  );
+  if (atRisk.length > 0)
+    return `Expiring soon: ${atRisk.map((p) => PERMIT_LABELS[p.permitType]).join(", ")}.`;
+
+  const inProgress = permits.filter((p) => p.workflowStatus === "IN_PROGRESS");
+  if (inProgress.length > 0)
+    return `Awaiting outcome: ${inProgress.map((p) => PERMIT_LABELS[p.permitType]).join(", ")}.`;
+
+  return null;
 }
